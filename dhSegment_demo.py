@@ -12,6 +12,9 @@
 # 1. Read an set of annotated images and produce the necessary data for training dhSegment
 # 2. Train a dhSegment model
 # 3. Use the dhSegment model to infer a semantic segmentation map
+# 
+# 
+# All you have to do is run the cells one by one, from first to last, using the arrow located at the top left corner of each cell.
 
 # ## Setup
 
@@ -19,13 +22,13 @@
 # 
 # The first 3 cells install dhSegment on the colab notebook, make the necessary imports and load the tensorboard extension to see the training process.
 
-# In[1]:
+# In[ ]:
 
 
 get_ipython().system('pip install git+https://github.com/dhlab-epfl/dhSegment-torch.git@master')
 
 
-# In[2]:
+# In[ ]:
 
 
 from dh_segment_torch.config import Params
@@ -46,7 +49,7 @@ import numpy as np
 import PIL.Image as Image
 
 
-# In[15]:
+# In[ ]:
 
 
 # Load the TensorBoard notebook extension
@@ -57,7 +60,7 @@ get_ipython().run_line_magic('load_ext', 'tensorboard')
 
 # This cell allows to link the Google colab notebook to your Google drive. It will ask you to provide a specific code to authorize the access.
 
-# In[4]:
+# In[ ]:
 
 
 from google.colab import drive
@@ -68,7 +71,7 @@ drive.mount('/content/drive')
 # 
 # If the cell gives an error, check that you have a 'GPU' runtime in the menu : Runtime > Change Runtime Type > Hardware Accelerator. Then rerun all the above cells again.
 
-# In[5]:
+# In[ ]:
 
 
 assert torch.cuda.device_count() >= 1
@@ -89,7 +92,7 @@ print("The GPU has %.2f GB of memory."%(torch.cuda.get_device_properties(0).tota
 # 
 # To see if the file are there, you can click on the folder icon in the left panel and mount your own GDrive account.
 
-# In[6]:
+# In[ ]:
 
 
 # Change this parameter to your folder
@@ -119,7 +122,7 @@ color_label = {
 # 
 # The following cell prepares the data according to the parameters defined above.
 
-# In[7]:
+# In[ ]:
 
 
 num_processes = params.pop("num_processes", 4)
@@ -172,7 +175,7 @@ with open(color_label['path'], 'w') as outfile:
 
 # ### Parameters
 
-# In[8]:
+# In[ ]:
 
 
 params = {
@@ -232,7 +235,7 @@ trainer.train()
 
 # The following cell will start and launch a Tensorboard instance. If it fails, relaunch the cell and wait until you see the Tensorboard orange bar.
 
-# In[25]:
+# In[ ]:
 
 
 tensorboard --logdir "/content/drive/My Drive/dhSegment-torch-master/tensorboard/log"
@@ -244,7 +247,7 @@ tensorboard --logdir "/content/drive/My Drive/dhSegment-torch-master/tensorboard
 
 # ### Parameters
 
-# In[27]:
+# In[ ]:
 
 
 dataset_params = {
@@ -259,8 +262,7 @@ model_params = {
             "decoder": {"decoder_channels": [512, 256, 128, 64, 32], "max_channels": 512}
         },
         "num_classes": 3,
-        "model_state_dict": sorted(glob.glob(
-            "/content/drive/My Drive/{}/models/best_model_checkpoint_miou=*.pth".format(folder_name)))[-1],
+        "model_state_dict": sorted(glob.glob("/content/drive/My Drive/{}/models/best_model_checkpoint_miou=*.pth".format(folder_name)))[-1],
         "device": "cuda:0"
 }
 
@@ -275,7 +277,7 @@ process_params = Params({
 
 # ### Compute prediction
 
-# In[28]:
+# In[ ]:
 
 
 output_dir = "/content/drive/My Drive/{}/predictions".format(folder_name)
@@ -288,7 +290,7 @@ images = [cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB) for path in sorted(g
 # #### Image
 # Choose an image (`image_nb`) for which you want to check the result
 
-# In[35]:
+# In[ ]:
 
 
 image_nb = 0
@@ -298,7 +300,7 @@ Image.fromarray(images[image_nb])
 # #### Probability map
 # For a given class (`class_nb`). The lighter pixels correspond to a higher class probability
 
-# In[40]:
+# In[ ]:
 
 
 class_nb = 2
@@ -307,7 +309,7 @@ Image.fromarray((np.around(results[image_nb][class_nb]*255)).astype('uint8'))
 
 # #### Most probable classes
 
-# In[37]:
+# In[ ]:
 
 
 image = np.argmax(results[image_nb], axis=0).astype('uint8')
@@ -318,13 +320,13 @@ for i, color in enumerate(colors):
 Image.fromarray(canvas)
 
 
-# In[38]:
+# In[ ]:
 
 
 Image.fromarray(canvas//2 + images[image_nb]//2)
 
 
-# In[41]:
+# In[ ]:
 
 
 mask = (image == class_nb).astype('uint8')*255
